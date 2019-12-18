@@ -24,7 +24,7 @@ $(function() {
 
   $("#github").click(function() {
     chrome.tabs.update({
-      url: "https://github.com/sean-smith/chrome_shortcuts"
+      url: "https://github.com/yejiel/chrome_shortcuts"
     });
     return false;
   });
@@ -37,6 +37,7 @@ $(function() {
     if (alias == "" || url == "") {
       event.preventDefault();
       alert("You must enter an alias and url...");
+      return
     }
 
     set(alias, url);
@@ -131,7 +132,7 @@ function insert(alias, url) {
   const divElemToAdd = document.createElement("div");
   divElemToAdd.classList.add("row");
   divElemToAdd.setAttribute("id", alias);
-  divElemToAdd.innerHTML = `<img class='removeBtn' src='img/x-square.svg'><div class='pill alias'>${alias}</div><img class='icon arrow' src='img/arrow_right.svg'><div class='pill url'>${url}</div>`;
+  divElemToAdd.innerHTML = DOMPurify.sanitize(`<img class='removeBtn' src='img/x-square.svg'><div class='pill alias'>${alias}</div><img class='icon arrow' src='img/arrow_right.svg'><div class='pill url'>${url}</div>`);
   divElemToAdd
     .querySelector(".removeBtn")
     .addEventListener("click", () => remove(alias));
@@ -139,18 +140,6 @@ function insert(alias, url) {
   $("#aliases").append(divElemToAdd);
 }
 
-var _gaq = _gaq || [];
-_gaq.push(["_setAccount", "UA-91305548-1"]);
-_gaq.push(["_trackPageview"]);
-
-(function() {
-  var ga = document.createElement("script");
-  ga.type = "text/javascript";
-  ga.async = true;
-  ga.src = "https://ssl.google-analytics.com/ga.js";
-  var s = document.getElementsByTagName("script")[0];
-  s.parentNode.insertBefore(ga, s);
-})();
 
 window.addEventListener("DOMContentLoaded", event => {
   console.log("DOM fully loaded and parsed");
