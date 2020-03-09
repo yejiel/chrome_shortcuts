@@ -3,7 +3,7 @@
   "name": "Shortcut Manager DELUXE",
   "short_name": "Omnibox Alias Delux",
   "description": "To use, type 'go' into the search bar.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "permissions": ["tabs", "storage", "activeTab"],
   "background": {
     "scripts": ["js/lib/jsencrypt.js", "js/background.js"]
@@ -13,7 +13,7 @@
     "default_icon": "img/terminal_16x16.png",
     "default_popup": "popup.html"
   },
-  "omnibox": { "keyword": "go" },
+  "omnibox": { "keyword": "a" },
   "icons": {
     "16": "img/terminal_16x16.png",
     "48": "img/terminal_48x48.png",

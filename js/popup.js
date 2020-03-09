@@ -49,10 +49,7 @@ $(function() {
 function set(alias, url) {
   var obj = {};
   obj[alias] = url;
-  chrome.storage.sync.set(obj, function() {
-    $("#alias").val("");
-    $("#url").val("");
-  });
+  chrome.storage.sync.set(obj)
 }
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
@@ -95,7 +92,7 @@ function handleExportAsync() {
   });
 }
 
-function handleImport() {
+function handleImport(file) {
   try {
     const files = document.getElementById("selectFiles").files;
     if (files.length <= 0) {
@@ -132,7 +129,7 @@ function insert(alias, url) {
   const divElemToAdd = document.createElement("div");
   divElemToAdd.classList.add("row");
   divElemToAdd.setAttribute("id", alias);
-  divElemToAdd.innerHTML = DOMPurify.sanitize(`<img class='removeBtn' src='img/x-square.svg'><div class='pill alias'>${alias}</div><img class='icon arrow' src='img/arrow_right.svg'><div class='pill url'>${url}</div>`);
+  divElemToAdd.innerHTML = DOMPurify.sanitize(`<img class='removeBtn' src='img/x-square.svg'><div class='pill alias'>${alias}</div><img class='icon arrow' src='img/arrow_right.svg'><div class='pill url aliasUrl' style="cursor:pointer" onclick="navigate${url}">${url}</div>`);
   divElemToAdd
     .querySelector(".removeBtn")
     .addEventListener("click", () => remove(alias));
@@ -140,12 +137,32 @@ function insert(alias, url) {
   $("#aliases").append(divElemToAdd);
 }
 
-
+function navigate(url){
+  chrome.tabs.update({
+    url: url
+  });
+}
 window.addEventListener("DOMContentLoaded", event => {
-  console.log("DOM fully loaded and parsed");
+
+    setTimeout(() => {
+      var urls = document
+      .getElementsByClassName("aliasUrl");
+      for (let i = 0; i < urls.length; i++) {
+        const u = urls[i];
+        u.addEventListener("click", e => {
+          chrome.tabs.update({
+            url: e.target.innerText
+          });
+          })
+      }
+    }, 300);
+
   document
     .querySelector("#import")
-    .addEventListener("click", () => handleImport());
+    .addEventListener("click", async () =>  {
+      const getting = await browser.runtime.getBackgroundPage().catch(e => console.log(e))
+        getting.document.body.children[2].click()
+    });
 
   document
     .querySelector("#export")

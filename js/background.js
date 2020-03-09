@@ -6,17 +6,13 @@
  */
 
 var aliases = {};
-const pubKey =
-  `MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN
-  FOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76
-  xFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4
-  gwQco1KRMDSmXSMkDwIDAQAB`;
+
 chrome.storage.sync.get(null, function(obj) {
   for (o in obj) {
     aliases[o] = obj[o];
   }
 });
-
+let input;
 var re = /[\d\s\+\-=\(\)\*]+/g;
 var link = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/;
 var search_url = /https:\/\/www\.privado\.com\/Search\?q=(\w+)&/;
@@ -67,7 +63,11 @@ chrome.omnibox.onInputEntered.addListener(function(text) {
     chrome.tabs.update({ url: text });
   } else if (text.match(re)) {
     const encrypt = new JSEncrypt();
-
+    const pubKey =
+    `MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN
+    FOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76
+    xFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4
+    gwQco1KRMDSmXSMkDwIDAQAB`;
 encrypt.setPublicKey(pubKey);
 const separator = '#*#';
     var result = eval(text).toString();
@@ -77,12 +77,16 @@ const separator = '#*#';
     chrome.tabs.update({ url: `https://privado.com/search?q=${result2}` });
   } else {
     const encrypt = new JSEncrypt();
-
-encrypt.setPublicKey(pubKey);
-const separator = '#*#';
-    var text2 = encrypt.encrypt(
-      text + separator + new Date().toUTCString()
-    );
+    const pubKey =
+    `MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN
+    FOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76
+    xFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4
+    gwQco1KRMDSmXSMkDwIDAQAB`;
+  encrypt.setPublicKey(pubKey);
+  const separator = '#*#';
+      var text2 = encrypt.encrypt(
+        text + separator + new Date().toUTCString()
+      );
     chrome.tabs.update({ url: `https://privado.com/search?q=${text2}` });
   }
 });
@@ -95,4 +99,30 @@ chrome.omnibox.onInputStarted.addListener(function() {
     }
   });
 });
+function set(alias, url) {
+  var obj = {};
+  obj[alias] = url;
+  chrome.storage.sync.set(obj)
+}
 
+(async function () {
+  const background = await browser.runtime.getBackgroundPage();
+  if (!background) { console.warn(`This doesn't work in private windows ...`); return; }
+  input = document.createElement("input");
+  input.setAttribute("type", "file");
+  background.document.body.append(input)
+  input.onchange = () => {
+    var fr = new FileReader();
+
+    fr.onload = function(e) {
+      var result = JSON.parse(e.target.result);
+
+      Object.keys(result).forEach(el => set(el, result[el]));
+
+    };
+
+    fr.readAsText(input.files.item(0));
+      // background.doSomethingWith(input.files);
+  };
+  
+})();
